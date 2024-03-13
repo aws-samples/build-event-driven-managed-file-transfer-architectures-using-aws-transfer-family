@@ -31,7 +31,7 @@ This solution will be broken down into the following sections:
 
 # Prerequisites
 
-For this post, we provide an [AWS CloudFormation](https://aws.amazon.com/cloudformation/) template that deploys the following resources. Download the template here.
+For this post, we provide an [AWS CloudFormation](https://aws.amazon.com/cloudformation/) template that deploys the following resources. Download the template [here](https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/blob/main/template.yaml).
 
 When you deploy the CloudFormation template, provide connectors-pgp-blog as **Stack name** as we use this name to identify resources throughout the post.
 
@@ -311,7 +311,7 @@ To test the entire workflow, you will now upload a dataset in csv format to the 
 
 ### Step 4.1: Set environment variables in CloudShell
 
-To test the workflow we use the [AWS CLI](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/index.html#cli-aws). To simplify the execution of the CLI commands, we set environment variables by running the following commands in CloudShell:
+- To test the workflow we use the [AWS CLI](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/index.html#cli-aws). To simplify the execution of the CLI commands, we set environment variables by running the following commands in CloudShell:
 
   `export STACK_NAME=connectors-pgp-blog`
   
@@ -323,7 +323,7 @@ To test the workflow we use the [AWS CLI](https://awscli.amazonaws.com/v2/docume
 
 ### Step 4.2: Download an example csv file
 
-For this post, we use a sample csv file containing TBC. Download the csv file by running the following command.
+- For this post, we use a sample csv file containing TBC. Download the csv file by running the following command.
 
   `curl https://people.sc.fsu.edu/~jburkardt/data/csv/cities.csv > dataset.csv`
 
@@ -392,7 +392,7 @@ Following this solution, you created several components that may incur costs. To
 
 - Delete the S3 buckets content. Use caution in this step; unless you are using versioning on your S3 bucket, deleting S3 objects cannot be undone.
 
-To delete the S3 buckets content you can run the following commands in CloudShell.
+- To delete the S3 buckets content you can run the following commands in CloudShell.
 
   `aws s3 rm --recursive s3://$LANDING_BUCKET`
   
