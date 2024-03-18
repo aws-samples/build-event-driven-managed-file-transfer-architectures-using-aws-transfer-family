@@ -2,13 +2,13 @@
 
 This solution demonstrates how to architect secure and compliant outbound file transfers with AWS Transfer Family SFTP Connectors and PGP encryption.
 
-This solution illustrates an event driven architecture for pre-processing, encrypting, and sending files to external partners over the SFTP protocol using [AWS Transfer Family](https://aws.amazon.com/aws-transfer-family/) and several other services like [Amazon S3](https://aws.amazon.com/s3/), [AWS Step Functions](https://aws.amazon.com/step-functions/), [Amazon DynamoDB](https://aws.amazon.com/dynamodb/), [AWS Lambda](https://aws.amazon.com/lambda/), [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/), [Amazon EventBridge](https://aws.amazon.com/eventbridge/), [Amazon SNS](https://aws.amazon.com/sns/) and [Amazon SQS](https://aws.amazon.com/sqs/).
+This solution illustrates an event driven architecture for pre-processing, encrypting, and sending files to external partners over the SFTP protocol using [AWS Transfer Family](https://aws.amazon.com/aws-transfer-family/) and additional supporting services like [Amazon S3](https://aws.amazon.com/s3/), [AWS Step Functions](https://aws.amazon.com/step-functions/), [Amazon DynamoDB](https://aws.amazon.com/dynamodb/), [AWS Lambda](https://aws.amazon.com/lambda/), [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/), [Amazon EventBridge](https://aws.amazon.com/eventbridge/), [Amazon SNS](https://aws.amazon.com/sns/) and [Amazon SQS](https://aws.amazon.com/sqs/).
 
-At the core of this architecture, we use a Step Functions state to execute the steps for processing and encrypting the files, before sending them to an external SFTP endpoint. The process starts when a file is uploaded in the landing S3 bucket with EventBridge enabled, executing the state.
+At the core of this architecture, we use a Step Functions state machine to execute the steps for processing and encrypting the files, before sending them to an external SFTP endpoint. The process starts when a file is uploaded in the landing S3 bucket with EventBridge enabled, executing the state.
 The state machine executes the following steps:
 
 -	Retrieve partner’s parameters from DynamoDB.
--	Execute custom process (for this post transform CSV file into JSON file).
+-	Execute custom process (for this post, we will transform a CSV file into JSON file).
 -	Encrypt the processed file using the PGP public key stored in Secrets Manager.
 -	Send the encrypted file to the partner by using a Transfer Family SFTP connector.
 -	Verify the status of the file transfer.
@@ -19,7 +19,7 @@ The state machine executes the following steps:
 ![image](https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/f004daec-a7ce-4f8d-b225-00a528af408a)
 
 
-For this solution, we impersonate the partner's SFTP server by creating a Transfer Family server and an S3 bucket to store the incoming files.
+For this solution, we emulate the partner's SFTP server by creating a Transfer Family server and an S3 bucket to store the incoming files.
 
 This solution will be broken down into the following sections:
 
@@ -95,7 +95,7 @@ Transfer Family accepts RSA-, ECDSA-, and ED25519-formatted keys; we use an RSA 
 
 ## Step 2: Configure the SFTP connector
 
-When you create a Transfer Family SFTP connector, you provide the following configuration parameters:
+When you create a Transfer Family SFTP connector, you will provide the following configuration parameters:
 
 - The credentials to authenticate to the remote SFTP server.
 - The URL of the SFTP server you want to connect to (you should have the URL noted in your text editor).
@@ -119,9 +119,9 @@ In a real-world scenario, your business partner would provide you with their pub
 
 You are prompted to enter certain specifications for your key pair.
 
-- When prompted to "Please select what kind of key you want" hit '1' and then "Enter", which selects option 1 RSA. As a reminder, RSA is a public-key encryption system that encrypts data with asymmetric encryption.
+- When prompted to "Please select what kind of key you want" type '1' and then "Enter", which selects option 1 RSA. As a reminder, RSA is a public-key encryption system that encrypts data with asymmetric encryption.
 
-- For this post, we accept the default key size of 3072 bits. When prompted with "What keysize do you want?", hit **Enter**, which causes 3072 bits to be chosen.
+- For this post, we accept the default key size of 3072 bits. When prompted with "What keysize do you want?", press **Enter**, which causes 3072 bits to be chosen.
 
 - Next you are asked "Key is valid for?" For this example, we hit **Enter** which means the key will never expire.
 
@@ -201,8 +201,8 @@ For this blog, we authenticate to the external SFTP server using private SSH key
 <img width="75%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/fbabf388-7893-4f50-8353-262686e3735a">
 
 
-- Replace the part that says **"PASTE-SSH-PRIVATE-KEY-HERE"** with your SSH private key copied from the previous step 2.2.
-- Replace where it says **"PASTE-PGP-PUBLIC-KEY-HERE"** with your PGP Public Key copied from the previous step 2.1.2.
+- Replace the part that says **"PASTE-SSH-PRIVATE-KEY-HERE"** with your SSH private key copied from the previous step 2.3.
+- Replace where it says **"PASTE-PGP-PUBLIC-KEY-HERE"** with your PGP Public Key copied from the previous step 2.2.
 - Finally, choose **Save** to update the secret.
 
 <img width="75%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/51451238-7991-4d87-885c-52b89eb21fd2">
@@ -214,7 +214,7 @@ Your secret should now look like this:
 
 ### Step 2.5: Identify the trusted host key
 
-- Retrieve the host key of the SFTP server by running the following command:
+- Retrieve the host key of the SFTP server created by the CloudFormation template by running the following command:
 
   `ssh-keyscan <server-endpoint>`
 
@@ -314,13 +314,15 @@ To test the entire workflow, you will now upload a dataset in csv format to the 
 - To test the workflow we use the [AWS CLI](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/index.html#cli-aws). To simplify the execution of the CLI commands, we set environment variables by running the following commands in CloudShell:
 
   `export STACK_NAME=connectors-pgp-blog`
-  
-  ``export LANDING_BUCKET=`aws cloudformation describe-stacks | jq -r --arg STACK_NAME "$STACK_NAME" '.Stacks[] | select(.StackName==$STACK_NAME) | .Outputs[] | select(.OutputKey=="LandingS3Bucket") | .OutputValue'``
-  
-  ``export OUTPUT_BUCKET=`aws cloudformation describe-stacks | jq -r --arg STACK_NAME "$STACK_NAME" '.Stacks[] | select(.StackName==$STACK_NAME) | .Outputs[] | select(.OutputKey=="OutboundTransferS3Bucket") | .OutputValue'``
-  
-  ``export SFTP_BUCKET=`aws cloudformation describe-stacks | jq -r --arg STACK_NAME "$STACK_NAME" '.Stacks[] | select(.StackName==$STACK_NAME) | .Outputs[] | select(.OutputKey=="SFTPServerS3Bucket") | .OutputValue'``
-
+  ```
+  export LANDING_BUCKET=`aws cloudformation describe-stacks | jq -r --arg STACK_NAME "$STACK_NAME" '.Stacks[] | select(.StackName==$STACK_NAME) | .Outputs[] | select(.OutputKey=="LandingS3Bucket") | .OutputValue'`
+  ```
+  ```
+  export OUTPUT_BUCKET=`aws cloudformation describe-stacks | jq -r --arg STACK_NAME "$STACK_NAME" '.Stacks[] | select(.StackName==$STACK_NAME) | .Outputs[] | select(.OutputKey=="OutboundTransferS3Bucket") | .OutputValue'`
+  ```
+  ```
+  export SFTP_BUCKET=`aws cloudformation describe-stacks | jq -r --arg STACK_NAME "$STACK_NAME" '.Stacks[] | select(.StackName==$STACK_NAME) | .Outputs[] | select(.OutputKey=="SFTPServerS3Bucket") | .OutputValue'`
+  ```
 ### Step 4.2: Download an example csv file
 
 - For this post, we use a sample csv file containing TBC. Download the csv file by running the following command.
