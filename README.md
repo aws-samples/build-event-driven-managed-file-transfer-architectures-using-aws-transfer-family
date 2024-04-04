@@ -323,15 +323,15 @@ To test the entire workflow, you will now upload a dataset in csv format to the 
   ```
   export SFTP_BUCKET=`aws cloudformation describe-stacks | jq -r --arg STACK_NAME "$STACK_NAME" '.Stacks[] | select(.StackName==$STACK_NAME) | .Outputs[] | select(.OutputKey=="SFTPServerS3Bucket") | .OutputValue'`
   ```
-### Step 4.2: Download an example csv file
+### Step 4.2: Create an example csv file
 
-- For this post, we use a sample csv file containing TBC. Download the csv file by running the following command.
+- Create a sample csv file by running the following command:
 
-  `curl https://people.sc.fsu.edu/~jburkardt/data/csv/cities.csv > dataset.csv`
+  `echo -e "City,State,Population\nSalt Lake City,Utah,1000000" > dataset.csv`
 
-### Step 4.3: Upload the csv file
+### Step 4.3: Upload the csv file to the landing S3 bucket
 
-- Upload the sample csv file to the landing S3 bucket by running the following command.
+- Upload the sample csv file to the landing S3 bucket by running the following command:
 
   `aws s3api put-object --body dataset.csv --bucket $LANDING_BUCKET --key partner_01/dataset.csv`
 
@@ -361,32 +361,45 @@ You shouldn't see any objects.
 
   `aws s3api list-objects-v2 --bucket $SFTP_BUCKET`
 
-You should see an output like this:
+The output should be:
 ```
     {
-    
     "Contents": [
-    
     {
-    
     "Key": "dataset.json.gpg",
-    
     "LastModified": "2024-03-01T01:41:15+00:00",
-    
     "ETag": "\"5b860964174bca41703e8885bcb35caa\"",
-    
     "Size": 20508,
-    
     "StorageClass": "STANDARD"
-    
     }
-    
     ],
-    
     "RequestCharged": null
-    
     }
-```    
+```
+-	Download the encrypted file to CloudShell by running the following command:
+
+  `aws s3 cp s3://$SFTP_BUCKET/dataset.json.gpg .`
+
+-	Decrypt the file by running the following command:
+
+  `gpg --output dataset.json --decrypt dataset.json.gpg`
+
+-	When prompted, enter the Passphrase you configured at step 2.1. The output should be:
+
+![image](https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/39c78cca-7f51-40e1-83e2-860a9bfc819f)
+
+
+-	Finally, verify the content of the decrypted file by running the following command:
+
+  `cat dataset.json | jq '.'`
+
+The output should be:
+
+![image](https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/b54d02a6-9a7c-4b42-90ac-0a507bf9115d)
+
+
+
+
 
 # Clean up
 
