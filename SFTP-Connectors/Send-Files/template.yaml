@@ -65,7 +65,8 @@ Resources:
                   commands:
                     - aws ecr get-login-password --region ${AWS::Region} | docker login --username AWS --password-stdin ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com
                 build:
-                  commands:    
+                  commands:
+                    - cd SFTP-Connectors/Send-Files
                     - docker build -t ${ECRRepo} .
                     - docker tag ${ECRRepo}:latest ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECRRepo}:latest  
                 post_build:
