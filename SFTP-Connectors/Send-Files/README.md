@@ -8,18 +8,21 @@ At the core of this architecture, we use a Step Functions state machine to execu
 The state machine executes the following steps:
 
 -	Retrieve partner’s parameters from DynamoDB.
--	Execute custom process (for this post, we will transform a CSV file into JSON file).
+-	Execute custom process (transform a CSV file into JSON file).
 -	Encrypt the processed file using the PGP public key stored in Secrets Manager.
 -	Send the encrypted file to the partner by using a Transfer Family SFTP connector.
 -	Verify the status of the file transfer.
 -	Delete the original and processed files if the file transfer is successful.
--	If any steps fail execution, the state machine sends a notification to a SNS topic to notify the failure.
+
+If any steps fail execution, the state machine sends a notification to a SNS topic to notify the failure.
+
+<img width="100%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/924ecba9-6de3-4e41-8bfd-93ec028259b5">
 
 
-![image](https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/f004daec-a7ce-4f8d-b225-00a528af408a)
 
 
-For this solution, we emulate the partner's SFTP server by creating a Transfer Family server and an S3 bucket to store the incoming files.
+For this solution, we emulate the partner's SFTP server by creating a Transfer Family server and an S3 bucket to store the incoming files. To learn about setting up a Transfer Family server, refer to this [Amazon documentation](https://docs.aws.amazon.com/transfer/latest/userguide/getting-started.html).
+
 
 This solution will be broken down into the following sections:
 
@@ -31,9 +34,14 @@ This solution will be broken down into the following sections:
 
 # Prerequisites
 
-For this post, we provide an [AWS CloudFormation](https://aws.amazon.com/cloudformation/) template that deploys the following resources. Download the template [here](https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/blob/main/template.yaml).
+We provide an [AWS CloudFormation](https://aws.amazon.com/cloudformation/) template that deploys the following resources. Download the template [here](https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/blob/main/template.yaml).
 
-When you deploy the CloudFormation template, provide connectors-pgp-blog as **Stack name** as we use this name to identify resources throughout the post.
+When you deploy the CloudFormation template, provide "connectors-pgp-blog" as **Stack name** as we use this name to identify resources throughout the post.
+
+Keep the options as default, check the box that says I acknowledge that AWS CloudFormation might create IAM resources, and then choose Submit.
+
+It should take approximately 10 minutes to create the stack.
+
 
 **Once the stack is deployed, take note of the values in the output tab. You need this information later.**
 
@@ -66,12 +74,12 @@ Transfer Family accepts RSA-, ECDSA-, and ED25519-formatted keys; we use an RSA 
 
 - When prompted to enter a passphrase, do not type anything and select Enter twice.
 
-<img width="75%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/6132fc41-6a46-4a49-a92c-79283f034f06">
+<img width="100%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/6132fc41-6a46-4a49-a92c-79283f034f06">
 
 
 ### Step 1.2: Import the SSH public key in Transfer Family
 
-- View the SSH public key by running the following command:
+- Output the SSH public key by running the following command:
 
   `cat partner_01.pub`
 
@@ -80,7 +88,7 @@ Transfer Family accepts RSA-, ECDSA-, and ED25519-formatted keys; we use an RSA 
 - On the Servers page, select the Server ID for server that was created by the CloudFormation template.
 - Select user **testuser** and in the SSH public keys pane, choose **Add SSH public key**.
 
-<img width="75%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/8030668b-1258-4a8b-84ed-f3ab483e66cd">
+<img width="100%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/8030668b-1258-4a8b-84ed-f3ab483e66cd">
 
 
 
@@ -89,7 +97,7 @@ Transfer Family accepts RSA-, ECDSA-, and ED25519-formatted keys; we use an RSA 
 
 
 
-<img width="75%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/0dd73720-b49e-42b6-aa85-2c0d4bcc3312">
+<img width="100%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/0dd73720-b49e-42b6-aa85-2c0d4bcc3312">
 
 
 
@@ -119,16 +127,16 @@ In a real-world scenario, your business partner would provide you with their pub
 
 You are prompted to enter certain specifications for your key pair.
 
-- When prompted to "Please select what kind of key you want" type '1' and then "Enter", which selects option 1 RSA. As a reminder, RSA is a public-key encryption system that encrypts data with asymmetric encryption.
+- When prompted to "Please select what kind of key you want" select '1' and then "Enter", which selects option 1 RSA. As a reminder, RSA is a public-key encryption system that encrypts data with asymmetric encryption.
 
-- For this post, we accept the default key size of 3072 bits. When prompted with "What keysize do you want?", press **Enter**, which causes 3072 bits to be chosen.
+- For this post, we accept the default key size of 3072 bits. When prompted with "What keysize do you want?", select **Enter**, which causes 3072 bits to be chosen.
 
-- Next you are asked "Key is valid for?" For this example, we hit **Enter** which means the key will never expire.
+- Next you are asked "Key is valid for?" Select **Enter** which means the key will never expire.
 
-- Review the configuration and then enter **y** to confirm.
+- Review the configuration and then select **y** to confirm.
 
-![image](https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/475521ac-91a3-4312-af35-a1a4bd06cd14)
 
+<img width="100%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/475521ac-91a3-4312-af35-a1a4bd06cd14">
 
 
 
@@ -138,14 +146,14 @@ You are prompted to enter certain specifications for your key pair.
 
 Now, you are prompted to construct a user ID to identify your key pair. You must provide:
 
-- **Real name**, we use **testuser** for this example.
-- **Email**, enter the email you would like to be associated with this key pair. We use this email later when we encrypt a file. For this example, we use [testuser@example.com](mailto:testuser@example.com).
+- **Real name**: we use **testuser** for this example.
+- **Email**: enter the email you would like to be associated with this key pair. We use this email later when we encrypt a file. For this example, we use [testuser@example.com](mailto:testuser@example.com).
+- **Comment**: leave this blank by selecting enter.
 - Verify the information you entered and accept typing **O** for Okay.
-- **Passphrase**, make sure you write down your passphrase, so you don't forget it for future use.
-
-![image](https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/6ae6b450-f386-4224-a0a4-81d39cec9810)
+- **Passphrase**: make sure you store your passphrase in a secure manner, so you don't forget it for future use.
 
 
+<img width="100%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/6ae6b450-f386-4224-a0a4-81d39cec9810">
 
 
 
@@ -164,14 +172,14 @@ PGP keys need to be formatted with embedded newline characters ("/n") in JSON fo
 
   `jq -sR . ./testuser-public-gpg`
 
-- Copy the output of the command, we use it later.
+- Copy the output of the command and paste it into your text editor of choice, we use it later.
 
-<img width="75%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/b7d9a105-91a3-4644-99b9-be233ba79d77">
+<img width="100%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/b7d9a105-91a3-4644-99b9-be233ba79d77">
 
 
-### Step 2.3: Export the SSH private key
+### Step 2.3: Export the SSH private key to authenticate into the remote SFTP server
 
-For this blog, we authenticate to the external SFTP server using private SSH key which also needs to be formatted with embedded newline characters ("/n") in JSON format.
+Transfer Family’s SFTP connectors can use either the SSH key, password, or both to authenticate into a remote SFTP server. In our case, we authenticate to the external SFTP server using the private SSH key, which also needs to be formatted with embedded newline characters ("/n") in JSON format.
 
 - Format the private SSH key you generated at step 1.1 by running the following command:
 
@@ -179,26 +187,26 @@ For this blog, we authenticate to the external SFTP server using private SSH key
 
 - Copy the output of the command, we need it in the next step.
 
-<img width="75%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/9db0ac35-9a1b-4754-95d6-c86eb092ecd3">
+<img width="100%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/9db0ac35-9a1b-4754-95d6-c86eb092ecd3">
 
 
 ### Step 2.4: Update the secret in AWS Secrets Manager
 
-- Open the Secrets Manager console, in the left navigation pane, choose **Secrets**, and then select the secret named **aws/transfer/connector-partner_01**.
+- Open the Secrets Manager console, in the left navigation pane, choose **Secrets**. Then select the secret named **aws/transfer/connector-partner_01**.
 
-<img width="75%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/8061e8cb-a64b-48c1-8775-06a3a62e17ac">
+<img width="100%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/8061e8cb-a64b-48c1-8775-06a3a62e17ac">
 
 
 - In the **Overview** tab, choose **Retrieve secret value**.
 
-<img width="75%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/e2823979-1c0c-40fa-95d9-a5b18b871cf8">
+<img width="100%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/e2823979-1c0c-40fa-95d9-a5b18b871cf8">
 
 
 - Select **Edit** and then **Plaintext**.
 
-**NOTE: You must edit the secret via the Plaintext method, as the Key/value method will not format the keys correctly.**
+**NOTE: You must edit the secret via the Plaintext method, as the Key/value method does not format the keys correctly.**
 
-<img width="75%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/fbabf388-7893-4f50-8353-262686e3735a">
+<img width="100%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/fbabf388-7893-4f50-8353-262686e3735a">
 
 
 - Replace the part that says **"PASTE-SSH-PRIVATE-KEY-HERE"** with your SSH private key copied from the previous step 2.3.
@@ -207,79 +215,84 @@ For this blog, we authenticate to the external SFTP server using private SSH key
 
 <img width="75%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/51451238-7991-4d87-885c-52b89eb21fd2">
 
-Your secret should now look like this:
+Select the **Key/Value** tab, your secret should be as follows:
 
-<img width="75%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/04d1ed64-7981-45ba-9394-1d5f9bac4c10">
+<img width="100%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/04d1ed64-7981-45ba-9394-1d5f9bac4c10">
 
 
-### Step 2.5: Identify the trusted host key
+### Step 2.5: Identify the trusted host key of the remote SFTP server
+
+- Note the Endpoint value of the Transfer Family server created by the CloudFormation template.
+
+<img width="100%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/e0dad018-44aa-4ca1-abd8-79f6cfe43fd8">
+
 
 - Retrieve the host key of the SFTP server created by the CloudFormation template by running the following command:
 
   `ssh-keyscan <server-endpoint>`
 
-You should see an output like this.
+The output should be as follows:
 
-<img width="75%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/b64e5ace-5be9-4c9a-a8a6-231f73daae4c">
+<img width="100%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/b64e5ace-5be9-4c9a-a8a6-231f73daae4c">
 
 
 - Copy the SSH host key and paste it in your text editor. You need the key in the next step.
 
 ### Step 2.6: Create the SFTP connector
 
-Now that we have all the necessary prerequisites, we can create the SFTP connector.
+Now that we have the necessary prerequisites, we can create the SFTP connector.
 
 - Open the [Transfer Family console](https://console.aws.amazon.com/transfer/).
 
 - In the left navigation pane, choose **Connectors**, then choose **Create connector**.
 
-<img width="75%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/3b8f312c-51d1-4525-aef1-dc838d540149">
+<img width="100%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/3b8f312c-51d1-4525-aef1-dc838d540149">
 
 
 - In the **Create connector** page, choose **SFTP** for the connector type, and then choose **Next**.
 
 - In the **Connector configuration** section, provide the following information:
 
-For the **URL** enter the server URL you noted in your text editor. It should look like **sftp://s-xxxxxxxx.server.transfer.<aws_region>.amazonaws.com**
+For the **URL** enter the server URL you find in the CloudFormation Outputs tab. It should look like the following:  **sftp://s-xxxxxxxx.server.transfer.<aws_region>.amazonaws.com**
 
-For both **Access role** and **Logging role**, choose the IAM role named **connectors-pgp-blog -SFTPConnectorRole-xxx**.
+For both **Access role** and **Logging role**, choose the IAM role named **connectors-pgp-blog-SFTPConnectorRole-xxx**.
 
-<img width="75%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/a080e28d-d85f-4bbb-909a-fda5c3dcdbb8">
+<img width="100%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/a080e28d-d85f-4bbb-909a-fda5c3dcdbb8">
 
 
 - In the **SFTP Configuration** section, provide the following information:
 
 For **Connector credentials**, from the dropdown list, choose the secret named **aws/transfer/connector-partner_01**
 
-For **Trusted host keys**, paste in the public portion of the host key you retrieved earlier using the **ssh-keyscan** command.
+For **Trusted host keys**, paste in the public portion of the host key you retrieved earlier using the **ssh-keyscan** command. You should have the host key in your text editor.
 
-<img width="75%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/a5cda315-e74b-45ae-b4f8-44d04ff22fc6">
+<img width="100%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/a5cda315-e74b-45ae-b4f8-44d04ff22fc6">
 
 
 - Finally, choose **Create connector** to create the SFTP connector.
 
-Take note of the **Connector ID**, you need it later.
+Take note of the **Connector ID**, you need it for the next step.
 
 If the connector is created successfully, a screen appears with a list of the assigned static IP addresses and a **Test connection** button. Use the button to test the configuration for your new connector.
 
-<img width="75%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/6c8aa7fa-5406-4707-8e46-f4fd3b5218fb">
+<img width="100%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/6c8aa7fa-5406-4707-8e46-f4fd3b5218fb">
 
 
-You should see a window like this:
+The output should be as follows:
 
-<img width="75%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/c252fb46-aa10-4a54-8757-16480ae10032">
+<img width="100%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/c252fb46-aa10-4a54-8757-16480ae10032">
 
 
 
 ## Step 3: Configure partner's parameters in DynamoDB
 
-In the previous steps, you created all the necessary resources. In this step, you create an item in the DynamoDB table **connectors-pgp-blog-CustomFileProcessingTable-xxx** containing all the necessary parameters to define an outbound file transfer:
+In this step, you create an item in the DynamoDB table **connectors-pgp-blog-CustomFileProcessingTable-xxx** containing the necessary parameters to define an outbound file transfer:
 
-- partnerId –The ID of the partner you are sending the file to.
-- lambdaARN – The ARN of the Lambda function for transforming CSV files into JSON.
-- pgpSecret – The ARN of the secret where we stored the PGP public key.
-- utputBucket – The name of the S3 bucket where we stage the file.
-- connectorId – The ID of the SFTP connector we want to use to send the file via SFTP.
+- partnerId: The ID of the partner you are sending the file to.
+- lambdaARN: The ARN of the Lambda function that transforms CSV files into JSON files.
+- pgpSecret: The ARN of the secret where we stored the PGP public key.
+- outputBucket: The name of the S3 bucket where we stage the file.
+- connectorId: The ID of the SFTP connector we want to use to send the file via SFTP.
 
 ### Step 3.1: Create the item in Dynamo DB
 
@@ -291,23 +304,23 @@ In the previous steps, you created all the necessary resources. In this step, yo
 
 - In the **Attributes** section, for **partnerId** enter **partner_01**, choose **Add new attribute** andthenchoose **String.**
 
-<img width="75%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/e123027b-bafd-4ea1-9b39-c06a9bdb1171">
+<img width="100%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/e123027b-bafd-4ea1-9b39-c06a9bdb1171">
 
 
-- For **Attribute name** type lambdaARN, and for **Value** enter the ARN of the Lambda function named **connectors-pgp-blog-CSVtoJSONLambdaFunction-xxx**. You should have noted this ARN in your text editor.
+- For **Attribute name** type lambdaARN, and for **Value** enter the ARN of the Lambda function named **connectors-pgp-blog-CSVtoJSONLambdaFunction-xxx**. In the CloudFormation Outputs tab, the Key is “CSVtoJSONLambdaFunctionARN”.
 
-- Add a new string attribute with **Attribute name** pgpSecret and **Value** the ARN of the secret named **aws/transfer/connector-partner_01**. You should have noted this ARN in your text editor.
+- Add a new string attribute with **Attribute name** pgpSecret and **Value** the ARN of the secret named **aws/transfer/connector-partner_01**. In the CloudFormation Outputs tab, the Key is “PartnerExampleSecret”.
 
-- Add a new string attribute with **Attribute name** outputBucket and **Value** **connectors-pgp-blog-outboundtransfers3bucket-xxx**. You should have noted this bucket's name in your text editor.
+- Add a new string attribute with **Attribute name** outputBucket and **Value** **connectors-pgp-blog-outboundtransfers3bucket-xxx**. In the CloudFormation Outputs tab, the Key is “OutboundTransferS3Bucket”.
 
 - Finally, add a new string attribute with **Attribute name** connectorId and **Value** the ID of the SFTP connector you created in step 2.5, and then choose **Create item** to store the parameters for partner_01.
 
-<img width="75%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/21152f81-2fa1-4913-9360-2c17a76b0d33">
+<img width="100%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/21152f81-2fa1-4913-9360-2c17a76b0d33">
 
 
 ## Step 4: Test end-to-end
 
-To test the entire workflow, you will now upload a dataset in csv format to the S3 landing bucket, specifying the S3 prefix matching the partnerId in the DynamoDb table. For this example, the partnerId is **partner_01** and therefore the S3 prefix is **partner_01/**. On the landing bucket, EventBridge is enabled and will execute the state machine when the new object is created.
+To test the entire workflow, you create a simple dataset in CSV format and upload it to the S3 landing bucket, specifying the Amazon S3 prefix matching the partnerId in the DynamoDB table. For this example, the partnerId is “partner_01” and thus the Amazon S3 prefix is “partner_01/”. On the landing bucket, EventBridge is enabled and executes the state machine when the new object is created.
 
 ### Step 4.1: Set environment variables in CloudShell
 
@@ -347,13 +360,13 @@ The last step executed by the state machine (Delete Originally Uploaded File) in
 
   `aws s3api list-objects-v2 --bucket $LANDING_BUCKET`
 
-You shouldn't see any objects.
+The output should not contain any objects.
 
 - Now confirm files partner\_01/dataset.json and partner\_01/dataset.json.gpg were successfully deleted from the output bucket:
 
   `aws s3api list-objects-v2 --bucket $OUTPUT_BUCKET`
 
-You shouldn't see any objects.
+The output should not contain any objects.
 
 ### Step 4.5: Review the S3 content at destination
 
@@ -386,7 +399,9 @@ The output should be:
 
 -	When prompted, enter the Passphrase you configured at step 2.1. The output should be:
 
-![image](https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/39c78cca-7f51-40e1-83e2-860a9bfc819f)
+
+<img width="100%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/39c78cca-7f51-40e1-83e2-860a9bfc819f">
+
 
 
 -	Finally, verify the content of the decrypted file by running the following command:
@@ -395,15 +410,15 @@ The output should be:
 
 The output should be:
 
-![image](https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/b54d02a6-9a7c-4b42-90ac-0a507bf9115d)
+<img width="100%" alt="image" src="https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/assets/59907142/b54d02a6-9a7c-4b42-90ac-0a507bf9115d">
 
 
 
 
 
-# Clean up
+# Cleaning up
 
-Following this solution, you created several components that may incur costs. To avoid future charges, remove the resources with the following steps:
+You created several components that may incur costs. To avoid future charges, remove the resources with the following steps:
 
 - Delete the S3 buckets content. Use caution in this step; unless you are using versioning on your S3 bucket, deleting S3 objects cannot be undone.
 
@@ -421,10 +436,12 @@ Following this solution, you created several components that may incur costs. To
 
 # Conclusion
 
-In this solution, we walked you through how to create an event driven architecture for pre-processing, encrypting, and sending files to external partners over the SFTP protocol.
+We walked through creating an event-driven architecture for pre-processing, encrypting, and sending files to external partners over the SFTP protocol. This included configuring an AWS Transfer Family SFTP connector with authentication credentials and a trusted host key, generating and storing a PGP public key in AWS Secrets Manager, defining partner parameters in Amazon DynamoDB, and orchestrating the workflow via an AWS Step Functions state machine. The state machine executed steps to retrieve partner configurations, process the file, encrypt it with PGP, transfer it over SFTP using the configured connector, verify status, and clean up temporary files. 
 
-This solution enables you to meet your data security needs, encrypting files containing sensitive and/or regulated datasets using Pretty Good Privacy (PGP) before easily send these files to partner hosted remote SFTP servers, using AWS Transfer Family's fully managed SFTP connectors. To learn more about Transfer Family, visit our [documentation](https://docs.aws.amazon.com/transfer/) and [product page](https://aws.amazon.com/aws-transfer-family/).
 
+This solution defines automated workflows for encrypting and sharing sensitive and/or regulated datasets with business partners, and comply with your security standards for external file transfers.
+
+To learn more about Transfer Family, visit our [documentation](https://docs.aws.amazon.com/transfer/) and [product page](https://aws.amazon.com/aws-transfer-family/).
 
 
 ## Security
