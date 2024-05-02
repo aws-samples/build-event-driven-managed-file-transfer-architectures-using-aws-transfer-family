@@ -16,7 +16,7 @@ For more information on how this repository is setup, please refer below.
     ├── SFTP-Connectors             # Architectures using SFTP Connectors
     │   └── Send-Files              # Processing, encrypting, and sending files using SFTP Connectors
 
-### Solutions
+## Solutions
 
 For processing, encrypting, and <strong>sending</strong> files using AWS Transfer Family SFTP connectors, refer here: [Sending Files using SFTP Connectors](https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/tree/main/SFTP-Connectors/Send-Files)
 
