@@ -18,7 +18,7 @@ For more information on how this repository is setup, please refer below.
 
 ### Solutions
 
-For processing, encrypting, and <strong>sending</strong> files using AWS Transfer Family SFTP connectors, refer here: [Sending Files using SFTP Connectors](https://gitlab.aws.dev/lawtontp/test-repo-folder-structure/-/tree/main/SFTP-Connectors/Send-Files)
+For processing, encrypting, and <strong>sending</strong> files using AWS Transfer Family SFTP connectors, refer here: [Sending Files using SFTP Connectors](https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/tree/main/SFTP-Connectors/Send-Files)
 
 ## Security
 
