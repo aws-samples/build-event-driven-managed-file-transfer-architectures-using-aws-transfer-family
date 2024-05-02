@@ -34,7 +34,7 @@ This solution will be broken down into the following sections:
 
 # Prerequisites
 
-We provide an [AWS CloudFormation](https://aws.amazon.com/cloudformation/) template that deploys the following resources. Download the template [here](https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/blob/main/template.yaml).
+We provide an [AWS CloudFormation](https://aws.amazon.com/cloudformation/) template that deploys the following resources. Download the template [here](https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors/blob/main/SFTP-Connectors/Send-Files/template.yaml).
 
 When you deploy the CloudFormation template, provide "connectors-pgp-blog" as **Stack name** as we use this name to identify resources throughout the post.
 
