@@ -52,7 +52,7 @@ Resources:
     Properties:
       Source:
         Type: GITHUB
-        Location: https://github.com/aws-samples/automated-file-processing-for-transfer-family-connectors.git
+        Location: https://github.com/aws-samples/build-event-driven-managed-file-transfer-architectures-using-aws-transfer-family.git
         BuildSpec: 
           !Sub
             - |
