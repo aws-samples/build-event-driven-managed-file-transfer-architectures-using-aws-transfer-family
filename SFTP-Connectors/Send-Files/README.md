@@ -1,5 +1,7 @@
 # Automated File Processing for Transfer Family Connectors
 
+[Link to corresponding blog post](https://aws.amazon.com/blogs/storage/architecting-secure-and-compliant-managed-file-transfers-with-aws-transfer-family-sftp-connectors-and-pgp-encryption/)
+
 This solution demonstrates how to architect secure and compliant outbound file transfers with AWS Transfer Family SFTP Connectors and PGP encryption.
 
 This solution illustrates an event driven architecture for pre-processing, encrypting, and sending files to external partners over the SFTP protocol using [AWS Transfer Family](https://aws.amazon.com/aws-transfer-family/) and additional supporting services like [Amazon S3](https://aws.amazon.com/s3/), [AWS Step Functions](https://aws.amazon.com/step-functions/), [Amazon DynamoDB](https://aws.amazon.com/dynamodb/), [AWS Lambda](https://aws.amazon.com/lambda/), [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/), [Amazon EventBridge](https://aws.amazon.com/eventbridge/), [Amazon SNS](https://aws.amazon.com/sns/) and [Amazon SQS](https://aws.amazon.com/sqs/).

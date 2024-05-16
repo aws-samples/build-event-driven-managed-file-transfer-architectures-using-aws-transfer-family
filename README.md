@@ -19,7 +19,7 @@ For more information on how this repository is setup, please refer below.
 
 ## Solutions
 
-For processing, encrypting, and <strong>sending</strong> files using AWS Transfer Family SFTP connectors, refer here: [Sending Files using SFTP Connectors](https://github.com/aws-samples/build-event-driven-managed-file-transfer-architectures-using-aws-transfer-family/tree/main/SFTP-Connectors/Send-Files)
+For processing, encrypting, and <strong>sending</strong> files using AWS Transfer Family SFTP connectors, refer here: [Sending Files using SFTP Connectors](https://aws.amazon.com/blogs/storage/architecting-secure-and-compliant-managed-file-transfers-with-aws-transfer-family-sftp-connectors-and-pgp-encryption/)
 
 ## Security
 
