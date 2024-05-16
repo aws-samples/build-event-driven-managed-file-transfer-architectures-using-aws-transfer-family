@@ -15,6 +15,7 @@ For more information on how this repository is setup, please refer below.
     .
     ├── SFTP-Connectors             # Architectures using SFTP Connectors
     │   └── Send-Files              # Processing, encrypting, and sending files using SFTP Connectors
+    │   └── Retrieve-Files          # Retrieving, decrypting, and processing files using SFTP Connectors (Work in Progress)
 
 ## Solutions
 
