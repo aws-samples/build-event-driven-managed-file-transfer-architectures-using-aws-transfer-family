@@ -78,13 +78,6 @@ def downloadfile(bucketname, key, filename):
         # If download fails, function returns false
         return False
 
-
-# Function that wipes /tmp directory clean
-def wipe_tmp_directory():
-    for root, dirs, files in os.walk("/tmp"):
-        for file in files:
-            os.remove(os.path.join(root, file))
-
 # Function that creates a temporary file within the /tmp directory.
 def createtempfile():
     with open('/tmp/tempfile', 'w') as fp:
