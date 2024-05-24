@@ -109,9 +109,9 @@ def handler(event, context):
     pgpKeyType = 'PGPPrivateKey'
 
     # Get variables from event
-    partnerId = event['PartnerParameters']['body']['partnerId']
-    pgpSecret = event['PartnerParameters']['body']['secretArn']
-    outputBucket = event['PartnerParameters']['body']['transferBucket']
+    partnerId = event['JobParameters']['body']['partnerId']
+    pgpSecret = event['JobParameters']['body']['pgpSecret']
+    outputBucket = event['JobParameters']['body']['transferBucket']
     bucket = event['detail']['local-file-location']['bucket']
     key = urllib.parse.unquote_plus(event['detail']['local-file-location']['key'])
 
