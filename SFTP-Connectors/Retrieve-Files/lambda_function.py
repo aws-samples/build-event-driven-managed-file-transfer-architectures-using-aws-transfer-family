@@ -111,7 +111,7 @@ def handler(event, context):
     # Get variables from event
     partnerId = event['JobParameters']['body']['partnerId']
     pgpSecret = event['JobParameters']['body']['pgpSecret']
-    outputBucket = event['JobParameters']['body']['transferBucket']
+    outputBucket = event['JobParameters']['body']['outputBucket']
     bucket = event['detail']['local-file-location']['bucket']
     key = urllib.parse.unquote_plus(event['detail']['local-file-location']['key'])
 
