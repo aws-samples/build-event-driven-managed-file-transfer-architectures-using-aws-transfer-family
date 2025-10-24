@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "Create custom file processing step function for outbound file transfers using SFTP connectors"
+Description: "Create custom file processing step function for outbound file transfers using SFTP connectors (uksb-eac2g8cxv6)"
 
 Resources:
 
